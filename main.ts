@@ -1,134 +1,78 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { Plugin } from 'obsidian';
 
-// Remember to rename these classes and interfaces!
+export default class SvgReplacePlugin extends Plugin {
+  async onload() {
+    console.log('Loading SVG Replace Plugin');
+    
+    this.registerMarkdownPostProcessor((element, context) => {
+      element.querySelectorAll('p').forEach((p) => {
+        let text = p.innerHTML;
+        const matches = text.match(/t:%(.*?)%/g);
+        
+        if (matches) {
+          matches.forEach((match) => {
+			const content = parseInt(match.substring(3, match.length - 1),16);
+			console.log(content)
+            const svg = this.generateSymbol(content, "white", 3);
+            text = text.replace(match, svg.outerHTML);
+          });
+          p.innerHTML = text;
+        }
+      });
+    });
+  }
 
-interface MyPluginSettings {
-	mySetting: string;
-}
+  generateSymbol(content : number, color : string, stroke_width : number) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '1.5em');
+    svg.setAttribute('height', '2em');
+    svg.setAttribute('viewBox', '0 0 50 90');
+    //Middle line
+	svg.innerHTML = `<line x1="0" y1="45" x2="50" y2="45" stroke="${color}" stroke-width="${stroke_width}" />`;
+	
+	// Top vertical lines
+	if (0x8000 & content)
+		svg.innerHTML += `<line x1="0" y1="45" x2="0" y2="20" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x4000 & content)
+		svg.innerHTML += `<line x1="25" y1="5" x2="25" y2="35" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x2000 & content)
+		svg.innerHTML += `<line x1="25" y1="35" x2="25" y2="45" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x1000 & content)
+		svg.innerHTML += `<line x1="50" y1="45" x2="50" y2="20" stroke="${color}" stroke-width="${stroke_width}" />`;
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
+	// Top diamond
+	if (0x0800 & content)
+		svg.innerHTML += `<line x1="0" y1="20" x2="25" y2="5" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0400 & content)
+		svg.innerHTML += `<line x1="25" y1="5" x2="50" y2="20" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0200 & content)
+		svg.innerHTML += `<line x1="50" y1="20" x2="25" y2="35" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0100 & content)
+		svg.innerHTML += `<line x1="25" y1="35" x2="0" y2="20" stroke="${color}" stroke-width="${stroke_width}" />`;
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+	// Bottom vertical lines
+	if (0x0080 & content)
+		svg.innerHTML += `<line x1="0" y1="50" x2="0" y2="65" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0040 & content)
+		svg.innerHTML += `<line x1="25" y1="50" x2="25" y2="80" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0020 & content)
+		svg.innerHTML += `<circle cx="25" cy="85" r="5" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0010 & content)
+		svg.innerHTML += `<line x1="50" y1="50" x2="50" y2="65" stroke="${color}" stroke-width="${stroke_width}" />`;
 
-	async onload() {
-		await this.loadSettings();
+	// Bottom diamond
+	if (0x0008 & content)
+		svg.innerHTML += `<line x1="0" y1="65" x2="25" y2="50" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0004 & content)
+		svg.innerHTML += `<line x1="25" y1="50" x2="50" y2="65" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0002 & content)
+		svg.innerHTML += `<line x1="50" y1="65" x2="25" y2="80" stroke="${color}" stroke-width="${stroke_width}" />`;
+	if (0x0001 & content)
+		svg.innerHTML += `<line x1="25" y1="80" x2="0" y2="65" stroke="${color}" stroke-width="${stroke_width}" />`;
+    return svg;
+  }
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-	}
-
-	onunload() {
-
-	}
-
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
-}
-
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
-
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+  onunload() {
+    console.log('Unloading SVG Replace Plugin');
+  }
 }
