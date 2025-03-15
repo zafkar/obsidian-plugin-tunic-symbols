@@ -1,6 +1,7 @@
 # Tunic Language Symbols
 
 This is a simple Obsidian plugin that displays Tunic language symbols.
+
 ## Installation
 
 > **It's recommended to create a new vault before using this plugin.**
@@ -10,7 +11,7 @@ Clone this repository in the `plugins` folder of your obsidian vault.
 
 In Obsidian settings, Under `community plugins`, click on `Turn on community plugins` if you haven't done so already.
 
-Enable `Tunic language symbols` 
+Enable `Tunic language symbols`.
 
 ## How to Use
 
