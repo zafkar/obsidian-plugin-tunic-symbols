@@ -1,10 +1,20 @@
 # Tunic Language Symbols
 
 This is a simple Obsidian plugin that displays Tunic language symbols.
+## Installation
+
+> **It's recommended to create a new vault before using this plugin.**
+
+Clone this repository in the `plugins` folder of your obsidian vault.
+*You may have to create the folder at `VAULT/.obsidian/plugins`*
+
+In Obsidian settings, Under `community plugins`, click on `Turn on community plugins` if you haven't done so already.
+
+Enable `Tunic language symbols` 
 
 ## How to Use
 
-The plugin replaces the pattern `t%hexchars%` with the corresponding Tunic symbols.
+The plugin replaces the pattern `t%hexchars%` with the corresponding Tunic symbols in the **read view**.
 Each bit in the `hexchars` string represents a possible line in the symbol.
 
 ### Single-Width Symbols
