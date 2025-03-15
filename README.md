@@ -1,94 +1,82 @@
-# Obsidian Sample Plugin
+# Tunic Language Symbols
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+This is a simple Obsidian plugin that displays Tunic language symbols.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## How to Use
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+The plugin replaces the pattern `t%hexchars%` with the corresponding Tunic symbols.
+Each bit in the `hexchars` string represents a possible line in the symbol.
 
-## First time developing plugins?
+### Single-Width Symbols
 
-Quick starting guide for new plugin devs:
+A single-width symbol requires **4 hexadecimal characters** to fully define its structure:
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- **First two characters** represent the **top half** of the symbol.
+- **Last two characters** represent the **bottom half** of the symbol.
 
-## Releasing new releases
+#### Breakdown
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+1. **First character**: Defines the **vertical lines** of the top section.
+   - Bit 1 → Leftmost line
+   - Bit 2 → Top part of the middle line
+   - Bit 3 → Bottom part of the middle line
+   - Bit 4 → Rightmost line
+2. **Second character**: Represents the **top diamond**.
+   - Each bit defines one side of the diamond, starting from the **top left**, moving **clockwise**.
+3. **Third character**: Defines the **bottom lines** and **circle**.
+   - Uses the same pattern as the top lines.
+   - Bit 3 represents the **circle**.
+4. **Fourth character**: Represents the **bottom diamond**.
+   - Follows the same pattern as the **top diamond**.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+### Multi-Width Symbols
 
-## Adding your plugin to the community plugin list
+> **This format may change in the future.**
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+Multi-width symbols require **4 hex characters per width unit**.
+Since widths overlap, a single symbol can have multiple representations.
 
-## How to use
+For example, both `t%10100000%` and `t%10108080%` produce the same symbol.
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+## Examples
 
-## Manually installing the plugin
+### Fully lined symbol
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+Single width symbol with all possible lines displayed
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```md
+t%ffff%
 ```
 
-If you have multiple URLs, you can also do:
+2 width symbol with all possible lines displayed
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+```md
+t%ffffffff%
 ```
 
-## API Documentation
+3 width symbol with all possible lines displayed
 
-See https://github.com/obsidianmd/obsidian-api
+```md
+t%ffffffffffff%
+```
+
+### In game examples
+
+The following are symbols found in game, I'll keep spoiler to the first 10 minutes of the game
+
+This symbol is found while pressing `A` on the mail-box
+
+```md
+t%80af2240abc3% ...
+```
+
+The following text is seen when obtaining the stick
+
+```md
+t%224a010c400c% t%8dac% t%3770008f% !
+```
+
+## TODO
+
+- [ ] Allow the use of symbols in filenames for internal links.
+- [ ] Fix potential "fence" ambiguity for multi-width symbols.
