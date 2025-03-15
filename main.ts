@@ -12,7 +12,7 @@ export default class SvgReplacePlugin extends Plugin {
         if (matches) {
           matches.forEach((match) => {
 			const content = match.substring(2, match.length - 1);
-			console.log(content)
+			//console.log(content)
             const svg = this.generateFullWord(content);
             text = text.replace(match, svg.outerHTML);
           });
@@ -20,6 +20,23 @@ export default class SvgReplacePlugin extends Plugin {
         }
       });
     });
+
+	this.registerMarkdownPostProcessor((element, context) => {
+		element.querySelectorAll('td').forEach((p) => {
+			let text = p.innerHTML;
+			const matches = text.match(/t%(.*?)%/g);
+			
+			if (matches) {
+			matches.forEach((match) => {
+				const content = match.substring(2, match.length - 1);
+				//console.log(content)
+				const svg = this.generateFullWord(content);
+				text = text.replace(match, svg.outerHTML);
+			});
+			p.innerHTML = text;
+			}
+		});
+		});
   }
 
   generateFullWord(word : string){
